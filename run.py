@@ -39,28 +39,20 @@ def _ensure_index():
     if (index_dir / "faiss_hnsw.index").exists():
         print(f"[setup] Index found at {index_dir}")
         return  # Already built
-    print("[setup] Index not found — building from dataset...")
-    print("[setup] This happens once on first run (~2 minutes).")
+    print("[setup] Index not found — building from knowledge base...")
+    print("[setup] This happens once on first run (~30-60s)...")
     try:
         os.makedirs(index_dir, exist_ok=True)
-        # Download dataset first
-        raw_dir = _VOICERAG_DIR / "data" / "raw"
-        raw_dir.mkdir(parents=True, exist_ok=True)
-        parquet_path = raw_dir / "msmarco_xi_hi.parquet"
-        if not parquet_path.exists():
-            print("[setup] Downloading MSMARCO-XI Hindi dataset...")
-            from huggingface_hub import hf_hub_download
-            hf_hub_download(
-                repo_id="ai4bharat/MSMARCO-XI",
-                filename="train/hintrain.parquet",
-                repo_type="dataset",
-                local_dir=str(raw_dir),
-                local_dir_use_symlinks=False,
-            )
-            print("[setup] Dataset downloaded!")
-        from voicerag.ingest.build_index import build_all
-        build_all(raw_dir=raw_dir, index_dir=index_dir)
-        print("[setup] ✅ Index built successfully!")
+        try:
+            from voicerag.data.build_india_index import build as build_kb_index
+            build_kb_index()
+            print("[setup] ✅ Knowledge base index built successfully!")
+        except Exception as e_kb:
+            print(f"[setup] Standard KB build failed ({e_kb}), falling back to pipeline builder...")
+            from voicerag.ingest.build_index import build_all
+            raw_dir = _VOICERAG_DIR / "data" / "raw"
+            build_all(raw_dir=raw_dir, index_dir=index_dir)
+            print("[setup] ✅ Index built successfully!")
     except Exception as e:
         print(f"[setup] ⚠️  Auto-build failed: {e}")
         print("[setup] Server will start but retrieval may not work.")

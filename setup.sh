@@ -36,11 +36,15 @@ print('  ✅ Dataset downloaded!')
 
 # 3. Build the FAISS + BM25 index
 echo ""
-echo "🔨 Step 3/4: Building FAISS + BM25 index (first run takes ~2 min)..."
+echo "🔨 Step 3/4: Building FAISS + BM25 index (first run takes ~1-2 min)..."
 python -c "
 import sys; sys.path.insert(0, '.')
-from ingest.build_index import build_index
-build_index()
+try:
+    from data.build_india_index import build as build_kb
+    build_kb()
+except Exception:
+    from ingest.build_index import build_index
+    build_index()
 print('  ✅ Index built!')
 "
 

@@ -36,6 +36,7 @@ except ImportError:
 
 # ── Config ──────────────────────────────────────────────────────
 INDEX_DIR = Path(__file__).resolve().parent / "index"
+RAW_DIR = Path(__file__).resolve().parent / "raw"
 EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 HNSW_M = 32
 HNSW_EF_CONSTRUCTION = 200
@@ -48,23 +49,35 @@ def build():
 
     INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
-    # ── 1. Load passage_native chunks ───────────────────────
-    native_path = INDEX_DIR / "chunks_passage_native.parquet"
-    native_df = pd.read_parquet(native_path)
-    print(f"Loaded {len(native_df)} passage_native chunks")
-
+    # ── 1. Load passages from available sources ─────────────────
     all_chunks = []
-    for _, row in native_df.iterrows():
-        all_chunks.append({
-            "chunk_id": row.get("chunk_id", ""),
-            "passage_id": row.get("passage_id", ""),
-            "text": row.get("text", ""),
-            "chunk_strategy": "passage_native",
-            "language": row.get("language", "hi"),
-            "original_query_id": row.get("original_query_id"),
-            "char_len": row.get("char_len", 0),
-            "has_answer_overlap": 0,
-        })
+    native_path = INDEX_DIR / "chunks_passage_native.parquet"
+    jsonl_path = RAW_DIR / "default_passages.jsonl"
+    passages_parquet = RAW_DIR / "passages.parquet"
+
+    native_df = None
+    if native_path.exists():
+        native_df = pd.read_parquet(native_path)
+        print(f"Loaded {len(native_df)} passage_native chunks from {native_path.name}")
+    elif jsonl_path.exists():
+        native_df = pd.read_json(jsonl_path, orient="records", lines=True)
+        print(f"Loaded {len(native_df)} default passages from {jsonl_path.name}")
+    elif passages_parquet.exists():
+        native_df = pd.read_parquet(passages_parquet)
+        print(f"Loaded {len(native_df)} passages from {passages_parquet.name}")
+
+    if native_df is not None and not native_df.empty:
+        for i, (_, row) in enumerate(native_df.iterrows()):
+            all_chunks.append({
+                "chunk_id": row.get("chunk_id", f"c_{i}"),
+                "passage_id": row.get("passage_id", f"p_{i}"),
+                "text": row.get("text", ""),
+                "chunk_strategy": "passage_native",
+                "language": row.get("language", "hi"),
+                "original_query_id": row.get("original_query_id") or row.get("query_id"),
+                "char_len": row.get("char_len", len(str(row.get("text", "")))),
+                "has_answer_overlap": 0,
+            })
 
     # ── 2. Add India Knowledge Base ──────────────────────────
     for p in INDIA_KB:
@@ -139,7 +152,7 @@ def build():
     """)
     cur.execute("CREATE INDEX IF NOT EXISTS idx_passage_id ON chunk_meta(passage_id)")
 
-    for i, row in chunks_df.iterrows():
+    for i, (_, row) in enumerate(chunks_df.iterrows()):
         cur.execute(
             "INSERT INTO chunk_meta VALUES (?,?,?,?,?,?,?,?,?)",
             (i, row.get("chunk_id", ""), row.get("passage_id", ""),

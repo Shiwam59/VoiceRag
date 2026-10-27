@@ -104,13 +104,27 @@ Open **http://localhost:8000** in your browser! 🎉
 
 ---
 
-## 🗂️ Dataset
+## 🗂️ Dataset & Scaling
 
-Based on [AI4Bharat MSMARCO-XI](https://huggingface.co/datasets/ai4bharat/MSMARCO-XI) multilingual dataset:
+VoiceRAG uses a hybrid approach for high-accuracy and GitHub-friendly scaling:
 
-- **1,617 passages** indexed (Hindi)
-- **Topics**: Geography, History, Culture, Science, Technology
-- **Languages**: Hindi, English, Urdu (via translation)
+1. **Curated India & Goa Knowledge Base** (`voicerag/data/india_knowledge_base.py`):
+   - High-precision facts covering Goa tourism, culture, history, all 28 states & 8 UTs.
+   - Tracked in Git for immediate, accurate answers.
+
+2. **Default Base Passages** (`voicerag/data/raw/default_passages.jsonl`):
+   - **1,617 passages** ready out of the box.
+   - Lightweight text format (< 2 MB) tracked cleanly in Git.
+   - First-time setup auto-builds the FAISS + BM25 index in ~30 seconds.
+
+3. **Scaling Up (5,000 to 100,000+ passages)**:
+   - To ingest more data from [AI4Bharat MSMARCO-XI](https://huggingface.co/datasets/ai4bharat/MSMARCO-XI):
+     ```bash
+     python -m voicerag.ingest.download --split hi --limit 10000
+     python -m voicerag.ingest.run_pipeline --split hi
+     python voicerag/data/build_india_index.py
+     ```
+   - Heavy raw caches and index binaries remain safely ignored in `.gitignore`, keeping your Git repository fast and clean.
 
 ---
 

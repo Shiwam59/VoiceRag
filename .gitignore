@@ -18,9 +18,10 @@ voicerag/data/hf_cache/
 data/hf_cache/
 .hf_cache/
 
-# Raw data (parquet files — download via build script)
-voicerag/data/raw/
-data/raw/
+# Raw data (heavy parquet files are downloaded on demand)
+voicerag/data/raw/*.parquet
+data/raw/*.parquet
+voicerag/data/raw/eval_qa.parquet
 
 # Built index (FAISS, BM25, SQLite, parquet — rebuild via build script)
 voicerag/data/index/
