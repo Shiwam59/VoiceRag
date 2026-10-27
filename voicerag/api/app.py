@@ -68,6 +68,12 @@ def _get_retriever():
             from voicerag.harness.retriever import HybridRetriever
             _retriever = HybridRetriever(index_dir)
             logging.warning("[retriever] Loaded %d vectors", _retriever.faiss_index.ntotal)
+            # Warm up embedding model & index so first query never blows deadline
+            try:
+                _retriever.retrieve("warmup", top_k=1)
+                logging.info("[retriever] Warm-up query completed")
+            except Exception as w_err:
+                logging.warning("[retriever] Warm-up skipped: %s", w_err)
         except Exception as e:
             logging.error("[retriever] Failed to load index: %s", e)
             return None
@@ -198,6 +204,51 @@ async def query_audio(
         session_id=response.session_id,
         error=response.error,
     )
+
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., description="Text to synthesize to speech")
+    language: str = Field("hi-IN", description="Language code (e.g. hi-IN, en-IN)")
+    speaker: str = Field("kavya", description="Speaker name (e.g. kavya, aditya)")
+
+
+@app.post("/tts")
+async def text_to_speech(req: TTSRequest):
+    """Studio AI Text-to-Speech using Sarvam bulbul:v3 model."""
+    sarvam_key = os.environ.get("SARVAM_API_KEY", "")
+    if not sarvam_key:
+        raise HTTPException(status_code=503, detail="SARVAM_API_KEY not configured")
+
+    lang_code = req.language
+    if len(lang_code) == 2:
+        lang_code = f"{lang_code}-IN"
+
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://api.sarvam.ai/text-to-speech",
+                headers={
+                    "api-subscription-key": sarvam_key,
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "inputs": [req.text[:500]],
+                    "target_language_code": lang_code,
+                    "speaker": req.speaker,
+                    "model": "bulbul:v3",
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            audios = data.get("audios", [])
+            if not audios:
+                raise ValueError("No audio returned from Sarvam TTS")
+            return {"audio_base64": audios[0], "format": "wav"}
+    except Exception as e:
+        logger.warning("Sarvam TTS failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"TTS generation error: {e}")
+
 
 
 @app.get("/stats")

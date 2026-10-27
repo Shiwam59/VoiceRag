@@ -29,7 +29,10 @@ import sqlite3
 
 from sentence_transformers import SentenceTransformer
 
-from india_knowledge_base import INDIA_KB
+try:
+    from voicerag.data.india_knowledge_base import INDIA_KB
+except ImportError:
+    from india_knowledge_base import INDIA_KB
 
 # ── Config ──────────────────────────────────────────────────────
 INDEX_DIR = Path(__file__).resolve().parent / "index"

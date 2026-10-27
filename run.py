@@ -58,8 +58,8 @@ def _ensure_index():
                 local_dir_use_symlinks=False,
             )
             print("[setup] Dataset downloaded!")
-        from voicerag.ingest.build_index import build_index
-        build_index()
+        from voicerag.ingest.build_index import build_all
+        build_all(raw_dir=raw_dir, index_dir=index_dir)
         print("[setup] ✅ Index built successfully!")
     except Exception as e:
         print(f"[setup] ⚠️  Auto-build failed: {e}")

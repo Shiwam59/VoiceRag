@@ -562,6 +562,15 @@ FAST_EXTRACTIVE_CONFIDENCE = float(os.environ.get("FAST_EXTRACTIVE_CONFIDENCE", 
 
 def _get_llm_config():
     """Read LLM config lazily so .env is loaded first."""
+    provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
+    if provider == "ollama":
+        base_url = os.environ.get("OLLAMA_BASE_URL", os.environ.get("LLM_BASE_URL", "http://127.0.0.1:11434")).strip()
+        if not base_url.endswith("/v1/chat/completions"):
+            base_url = base_url.rstrip("/") + "/v1/chat/completions"
+        model = os.environ.get("OLLAMA_MODEL", os.environ.get("LLM_MODEL", "qwen2.5:1.5b")).strip()
+        api_key = os.environ.get("LLM_API_KEY", "ollama").strip()
+        return api_key, base_url, model
+
     return (
         os.environ.get("LLM_API_KEY", ""),
         os.environ.get("LLM_BASE_URL", LLM_BASE_URL_DEFAULT),

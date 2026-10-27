@@ -9,7 +9,7 @@ echo "=================="
 # 1. Install Python dependencies
 echo ""
 echo "📦 Step 1/4: Installing Python dependencies..."
-pip install -r voicerag/requirements.txt 2>&1 | tail -3
+pip install -r requirements.txt 2>&1 | tail -3
 
 # 2. Download Hindi MSMARCO-XI dataset
 echo ""

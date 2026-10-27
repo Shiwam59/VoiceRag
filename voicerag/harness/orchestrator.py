@@ -244,6 +244,7 @@ def run_pipeline(
             confidence=0.0,
             refused=True,
             refusal_reason=RefusalReason.OFF_TOPIC,
+            transcript=transcript,
             error=f"Retrieval error: {e}",
             session_id=request.session_id,
         )
@@ -255,6 +256,7 @@ def run_pipeline(
             confidence=0.0,
             refused=True,
             refusal_reason=RefusalReason.OFF_TOPIC,
+            transcript=transcript,
             session_id=request.session_id,
         )
 
@@ -285,6 +287,7 @@ def run_pipeline(
             confidence=0.0,
             refused=True,
             refusal_reason=guardrail_result.refusal_reason,
+            transcript=transcript,
             session_id=request.session_id,
         )
 
@@ -338,6 +341,7 @@ def run_pipeline(
             confidence=0.0,
             refused=True,
             refusal_reason=RefusalReason.OFF_TOPIC,
+            transcript=transcript,
             session_id=request.session_id,
         )
 

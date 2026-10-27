@@ -17,6 +17,13 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 import pandas as pd
@@ -71,7 +78,7 @@ def test_retrieval(index_dir: Path) -> bool:
 
     assert len(result.passages) > 0, "No passages returned"
     assert any("निगम" in p.text for p in result.passages), "Top passage doesn't contain expected Hindi text"
-    print("  ✓ Retrieval returns relevant passages")
+    print("  OK: Retrieval returns relevant passages")
     return True
 
 
@@ -88,8 +95,8 @@ def test_pipeline(index_dir: Path) -> bool:
     assert response.answer, "Empty answer"
     assert not response.refused, "Query was incorrectly refused"
     assert len(response.citations) > 0, "No citations"
-    print(f"  ✓ Pipeline answer: {response.answer[:80]}…")
-    print(f"  ✓ Citations: {response.citations}")
+    print(f"  OK: Pipeline answer: {response.answer[:80]}...")
+    print(f"  OK: Citations: {response.citations}")
     return True
 
 
@@ -108,7 +115,7 @@ def test_off_topic(index_dir: Path) -> bool:
     retriever.close()
 
     # This might not be refused on a tiny index — just check it doesn't crash
-    print(f"  ✓ Off-topic query handled (refused={response.refused})")
+    print(f"  OK: Off-topic query handled (refused={response.refused})")
     return True
 
 
@@ -127,7 +134,7 @@ def test_unsafe(index_dir: Path) -> bool:
     retriever.close()
 
     assert response.refused, "Unsafe query was NOT refused"
-    print(f"  ✓ Unsafe query correctly refused: {response.refusal_reason}")
+    print(f"  OK: Unsafe query correctly refused: {response.refusal_reason}")
     return True
 
 
@@ -150,10 +157,10 @@ def test_telemetry(index_dir: Path) -> bool:
     assert "guardrail_check" in stage_names, "Missing guardrail telemetry"
     assert "generate" in stage_names, "Missing generate telemetry"
 
-    print(f"  ✓ Telemetry recorded for {len(timings)} stages")
+    print(f"  OK: Telemetry recorded for {len(timings)} stages")
     if response.latency_breakdown:
         lb = response.latency_breakdown
-        print(f"  ✓ Latency: retrieve={lb.retrieve_ms:.1f}ms, generate={lb.generate_ms:.1f}ms, total={lb.total_post_stt_ms:.1f}ms")
+        print(f"  OK: Latency: retrieve={lb.retrieve_ms:.1f}ms, generate={lb.generate_ms:.1f}ms, total={lb.total_post_stt_ms:.1f}ms")
     return True
 
 
@@ -165,24 +172,24 @@ def main():
     with tempfile.TemporaryDirectory() as tmpdir:
         index_dir = Path(tmpdir)
 
-        print("\nBuilding mini index from fixtures …")
+        print("\nBuilding mini index from fixtures...")
         build_mini_index(index_dir)
-        print("  ✓ Mini index built")
+        print("  OK: Mini index built")
 
-        print("\nRunning tests …")
+        print("\nRunning tests...")
         all_passed = True
         for test_fn in [test_retrieval, test_pipeline, test_off_topic, test_unsafe, test_telemetry]:
             try:
                 test_fn(index_dir)
             except Exception as e:
-                print(f"  ✗ FAILED: {e}")
+                print(f"  FAIL: {e}")
                 all_passed = False
 
     print("\n" + "=" * 60)
     if all_passed:
-        print("ALL TESTS PASSED ✓")
+        print("ALL TESTS PASSED [OK]")
     else:
-        print("SOME TESTS FAILED ✗")
+        print("SOME TESTS FAILED [FAIL]")
     print("=" * 60)
 
 

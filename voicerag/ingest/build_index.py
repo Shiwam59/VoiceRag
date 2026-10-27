@@ -73,7 +73,7 @@ def build_metadata_sidecar(chunks_df: pd.DataFrame, db_path: Path) -> sqlite3.Co
     cur.execute("CREATE INDEX IF NOT EXISTS idx_passage_id ON chunk_meta(passage_id)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_strategy ON chunk_meta(chunk_strategy)")
 
-    for i, row in chunks_df.iterrows():
+    for i, (_, row) in enumerate(chunks_df.iterrows()):
         cur.execute(
             """INSERT INTO chunk_meta
                (idx, chunk_id, passage_id, chunk_strategy, language,
@@ -216,6 +216,10 @@ def build_all(
     logger.info("  FAISS: %d vectors", faiss_index.ntotal)
     logger.info("  BM25: %d documents", len(chunks_df))
     logger.info("  Metadata: %d records", len(chunks_df))
+
+
+# Alias for backward compatibility with setup scripts
+build_index = build_all
 
 
 def main() -> None:

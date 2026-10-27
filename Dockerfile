@@ -16,6 +16,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
+# Environment variables for Ollama
+ENV LLM_PROVIDER=ollama \
+    OLLAMA_MODEL=qwen2.5:1.5b \
+    OLLAMA_BASE_URL=http://127.0.0.1:11434
+
 # Expose port
 EXPOSE 8000
 
