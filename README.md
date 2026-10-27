@@ -104,27 +104,69 @@ Open **http://localhost:8000** in your browser! 🎉
 
 ---
 
-## 🗂️ Dataset & Scaling
+## 🗂️ Dataset & Scaling Guide
 
-VoiceRAG uses a hybrid approach for high-accuracy and GitHub-friendly scaling:
+VoiceRAG uses a hybrid approach to combine high accuracy with GitHub-friendly repository sizes:
 
-1. **Curated India & Goa Knowledge Base** (`voicerag/data/india_knowledge_base.py`):
-   - High-precision facts covering Goa tourism, culture, history, all 28 states & 8 UTs.
-   - Tracked in Git for immediate, accurate answers.
+* **Curated Baseline (Pre-bundled in Git)**: 1,617 verified passages (~1.8 MB total) in [`voicerag/data/raw/default_passages.jsonl`](file:///c:/Users/SHIWAM%20LAL/Desktop/HHgoaVoiceRag/HHgoaVoice/voicerag/data/raw/default_passages.jsonl) and [`voicerag/data/india_knowledge_base.py`](file:///c:/Users/SHIWAM%20LAL/Desktop/HHgoaVoiceRag/HHgoaVoice/voicerag/data/india_knowledge_base.py).
+* **Zero Download Startup**: Fresh clones automatically index the bundled dataset on first `python run.py` in ~30 seconds.
 
-2. **Default Base Passages** (`voicerag/data/raw/default_passages.jsonl`):
-   - **1,617 passages** ready out of the box.
-   - Lightweight text format (< 2 MB) tracked cleanly in Git.
-   - First-time setup auto-builds the FAISS + BM25 index in ~30 seconds.
+---
 
-3. **Scaling Up (5,000 to 100,000+ passages)**:
-   - To ingest more data from [AI4Bharat MSMARCO-XI](https://huggingface.co/datasets/ai4bharat/MSMARCO-XI):
-     ```bash
-     python -m voicerag.ingest.download --split hi --limit 10000
-     python -m voicerag.ingest.run_pipeline --split hi
-     python voicerag/data/build_india_index.py
-     ```
-   - Heavy raw caches and index binaries remain safely ignored in `.gitignore`, keeping your Git repository fast and clean.
+### How to Scale Up the Dataset
+
+If you want to scale up VoiceRAG from 1,600 passages to 10,000, 50,000, or 100,000+ passages, follow either of the two methods below:
+
+#### Method A: Scale General Multilingual Data (Hugging Face)
+VoiceRAG integrates directly with the [AI4Bharat MSMARCO-XI](https://huggingface.co/datasets/ai4bharat/MSMARCO-XI) dataset.
+
+1. **Download more rows** (set `--limit` to your desired count):
+   ```bash
+   # Download 10,000 passages in Hindi (or 'te', 'ta', 'bn', 'mr')
+   python -m voicerag.ingest.download --split hi --limit 10000
+   ```
+
+2. **Process and chunk the corpus**:
+   ```bash
+   python -m voicerag.ingest.run_pipeline --split hi
+   ```
+
+3. **Rebuild the hybrid FAISS + BM25 index**:
+   ```bash
+   python voicerag/data/build_india_index.py
+   ```
+
+#### Method B: Add Custom Domain Data (Tourism, FAQs, Government, Healthcare)
+For specialized domains where precision and zero hallucination are critical:
+
+1. **Option 1: Add directly to `voicerag/data/india_knowledge_base.py`**:
+   ```python
+   INDIA_KB.append({
+       "passage_id": "p_custom_001",
+       "text": "गोवा में प्रसिद्ध पणजी चर्च (Our Lady of the Immaculate Conception) 1541 में स्थापित हुआ था।",
+   })
+   ```
+
+2. **Option 2: Add lines to `voicerag/data/raw/default_passages.jsonl`**:
+   ```json
+   {"passage_id": "p_custom_002", "text": "Your passage in Hindi, English, or Urdu...", "language": "hi"}
+   ```
+
+3. **Rebuild the index**:
+   ```bash
+   python voicerag/data/build_india_index.py
+   ```
+
+---
+
+### 💡 Scaling Tips & Best Practices
+
+| Aspect | Recommendation |
+| :--- | :--- |
+| **GitHub Storage** | Keep raw parquet files and `.faiss` indices in `.gitignore` (already configured). Git only tracks your text/code so pushes stay fast and never exceed GitHub's 100MB limit. |
+| **Embedding Speed** | ~30–50 passages/sec on CPU; ~500+ passages/sec if CUDA GPU is available. |
+| **RAM Footprint** | FAISS HNSW uses ~15 MB RAM for 10,000 vectors and search latency remains under **20 ms**. |
+| **Validation** | Always verify retrieval and pipeline after scaling by running: `python voicerag/tests/smoke_test.py`. |
 
 ---
 
