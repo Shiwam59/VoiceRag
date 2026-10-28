@@ -3,469 +3,671 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceRAG — Voice-Enabled RAG</title>
+    <title>VoiceRAG — Voice-Enabled Multilingual Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --border: #334155;
-            --text: #f1f5f9;
+            --bg: #090d16;
+            --surface: #111827;
+            --surface-elevated: #1a2234;
+            --surface-hover: #222d42;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(99, 102, 241, 0.5);
+            --text: #f8fafc;
             --text-muted: #94a3b8;
+            --text-dim: #64748b;
             --primary: #6366f1;
-            --primary-hover: #818cf8;
-            --success: #22c55e;
-            --warning: #eab308;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.25);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.12);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.12);
             --danger: #ef4444;
-            --radius: 12px;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --radius-sm: 8px;
+            --radius: 14px;
+            --radius-lg: 20px;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
             color: var(--text);
             min-height: 100vh;
-            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2.5rem 1.25rem 4rem;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
+            width: 100%;
+            max-width: 760px;
         }
 
-        /* Header */
+        /* ── Header ── */
         .header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .header p {
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-        }
-
-        /* Server status banner */
-        .server-status {
-            text-align: center;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: none;
-        }
-        .server-status.offline {
-            display: block;
-            background: #991b1b;
-            color: #fecaca;
-            border: 1px solid var(--danger);
-        }
-        .server-status.online {
-            display: block;
-            background: #166534;
-            color: #bbf7d0;
-            border: 1px solid var(--success);
-        }
-
-        /* Input area */
-        .input-area {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .input-row textarea {
-            flex: 1;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            resize: none;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .input-row textarea:focus {
-            border-color: var(--primary);
-        }
-        .input-row textarea::placeholder {
-            color: var(--text-muted);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+        .header-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #a5b4fc;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            letter-spacing: 0.02em;
         }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
+        .header-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
         }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 400;
         }
 
-        .btn-mic {
-            background: var(--danger);
-            color: white;
-            min-width: 120px;
+        /* ── Server status banner ── */
+        .server-status {
+            text-align: center;
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+            font-size: 0.82rem;
+            font-weight: 500;
+            display: none;
+            backdrop-filter: blur(8px);
         }
-        .btn-mic:hover { background: #dc2626; }
-        .btn-mic.recording {
-            background: #991b1b;
-            animation: pulse 1.5s ease-in-out infinite;
+        .server-status.offline {
+            display: block;
+            background: var(--danger-bg);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .server-status.online {
+            display: block;
+            background: var(--success-bg);
+            color: #86efac;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+        /* ── Unified Input Card ── */
+        .input-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .input-card:focus-within {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--primary-glow), var(--shadow);
         }
 
-        .controls-row {
+        .query-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 1.05rem;
+            font-family: inherit;
+            resize: none;
+            line-height: 1.6;
+            min-height: 64px;
+        }
+        .query-textarea::placeholder {
+            color: var(--text-dim);
+            font-weight: 400;
+        }
+
+        /* Input Toolbar */
+        .input-toolbar {
             display: flex;
+            align-items: center;
             justify-content: space-between;
+            padding-top: 0.75rem;
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--border);
+            gap: 0.75rem;
+        }
+        .toolbar-left, .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        /* Language selector */
+        .lang-select-wrapper {
+            position: relative;
+            display: inline-flex;
             align-items: center;
         }
         .lang-select {
-            background: var(--bg);
+            appearance: none;
+            background: var(--surface-elevated);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            padding: 0.4rem 1.75rem 0.4rem 0.85rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .lang-select:hover {
+            border-color: rgba(255, 255, 255, 0.2);
             color: var(--text);
-            font-size: 0.9rem;
+        }
+        .lang-select-arrow {
+            position: absolute;
+            right: 0.7rem;
+            pointer-events: none;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            border: none;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
             outline: none;
         }
 
-        /* Results area */
-        .results {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            display: none;
-        }
-        .results.visible { display: block; }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .confidence-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .confidence-high { background: #166534; color: #bbf7d0; }
-        .confidence-medium { background: #854d0e; color: #fef08a; }
-        .confidence-low { background: #991b1b; color: #fecaca; }
-        .confidence-refused { background: #1e293b; color: #f87171; border: 1px solid var(--danger); }
-
-        /* Transcript display */
-        .transcript-section {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-        .transcript-section.visible { display: block; }
-        .transcript-label {
-            font-size: 0.75rem;
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .transcript-text {
-            font-size: 0.95rem;
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        .answer-text {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
-        .answer-content {
-            flex: 1;
-        }
-        .btn-speak {
+        .btn-send {
             background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            font-size: 1rem;
-            cursor: pointer;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            color: #ffffff;
+            padding: 0.55rem 1.15rem;
+            border-radius: var(--radius-sm);
         }
-        .btn-speak:hover { background: var(--primary-hover); }
-        .btn-speak.speaking {
-            background: var(--success);
-            animation: pulse 1.5s ease-in-out infinite;
+        .btn-send:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-send:active { transform: translateY(0); }
+        .btn-send:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .citations {
-            margin-bottom: 1.5rem;
-        }
-        .citations h3 {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-        .citation-item {
-            background: var(--bg);
+        .btn-record {
+            background: var(--surface-elevated);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.5;
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
         }
-        .citation-id {
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 0.8rem;
+        .btn-record:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn-record.recording {
+            background: var(--danger);
+            border-color: transparent;
+            color: #ffffff;
+            animation: pulse-ring 1.8s infinite;
         }
 
-        /* Latency breakdown */
-        .latency {
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
+        @keyframes pulse-ring {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
         }
-        .latency h3 {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 0.75rem;
-        }
-        .latency-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-        .latency-row {
-            display: flex;
+
+        /* Active recording visualizer pill */
+        .recording-pill {
+            display: none;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
+            background: var(--danger-bg);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 9999px;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.78rem;
+            color: #fca5a5;
         }
-        .latency-label {
-            width: 100px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-align: right;
+        .recording-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: blink 1s infinite;
         }
-        .latency-bar {
-            flex: 1;
-            height: 8px;
-            background: var(--bg);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .latency-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-        .latency-value {
-            width: 70px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            font-variant-numeric: tabular-nums;
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
-        /* Loading */
+        /* ── Suggestion Chips ── */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        .chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chip:hover {
+            background: var(--surface-elevated);
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-1px);
+        }
+
+        /* ── Loading Spinner ── */
         .loading {
             display: none;
             text-align: center;
-            padding: 2rem;
+            padding: 2.5rem 0;
             color: var(--text-muted);
         }
         .loading.visible { display: block; }
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border: 2.5px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 1rem;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 0.75rem;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Stats panel */
-        .stats-panel {
-            margin-top: 2rem;
+        /* ── Results Card ── */
+        .results {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: none;
+            animation: fadeIn 0.25s ease-out;
+            margin-bottom: 2rem;
         }
-        .stats-panel h2 {
-            font-size: 1.1rem;
+        .results.visible { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Voice Transcript Bubble */
+        .transcript-section {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+            display: none;
+        }
+        .transcript-section.visible { display: block; }
+        .transcript-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.2rem;
+        }
+        .transcript-text {
+            font-size: 0.92rem;
+            color: var(--text);
+        }
+
+        /* Answer Output Area */
+        .answer-container {
+            margin-bottom: 1.25rem;
+        }
+        .answer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            gap: 0.5rem;
+        }
+        .badge-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .confidence-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+            letter-spacing: 0.02em;
+        }
+        .confidence-high { background: var(--success-bg); color: #86efac; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .confidence-medium { background: var(--warning-bg); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .confidence-low { background: var(--danger-bg); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .confidence-refused { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid var(--danger); }
+
+        .extractive-pill {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            display: none;
+        }
+
+        .btn-voice {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-voice:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn-voice.speaking {
+            background: var(--success-bg);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #86efac;
+        }
+
+        .answer-content {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #f1f5f9;
+            word-wrap: break-word;
+        }
+
+        /* ── Collapsible Details (Citations & Latency) ── */
+        .details-accordion {
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+        .accordion-toggle {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            cursor: pointer;
+            padding: 0.3rem 0;
+            user-select: none;
+        }
+        .accordion-toggle:hover { color: var(--text); }
+        .accordion-content {
+            display: none;
+            padding-top: 0.85rem;
+        }
+        .accordion-content.open { display: block; }
+
+        /* Citations list */
+        .citations {
             margin-bottom: 1rem;
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
+        .citations h3 {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
         }
-        .stat-card {
-            background: var(--bg);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
+        .citation-item {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            font-variant-numeric: tabular-nums;
+        .citation-id {
+            color: #a5b4fc;
+            font-weight: 600;
         }
-        .stat-label {
+
+        /* Latency bars */
+        .latency h3 {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .latency-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .latency-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .latency-label {
+            width: 80px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-align: right;
+        }
+        .latency-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--surface-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .latency-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        .latency-value {
+            width: 60px;
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: 0.25rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Compact Bottom Stats ── */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            max-width: fit-content;
+            margin: 0 auto;
+        }
+        .stat-item b {
+            color: var(--text);
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Minimal Header -->
         <div class="header">
+            <div class="header-badge">
+                <span class="dot"></span>
+                <span>Fast Hybrid RAG · Hindi · English · Urdu</span>
+            </div>
             <h1>VoiceRAG</h1>
-            <p>Voice-enabled RAG - Ask in English or Hindi, get answers in the same language</p>
+            <p>Speak or type anything about India to retrieve cited answers instantly</p>
         </div>
 
         <div class="server-status" id="serverStatus"></div>
 
-        <div class="input-area">
-            <div class="input-row">
-                <textarea id="queryInput" rows="2" placeholder="Type in English or Hindi... (Apna sawal yahan likhen)" autofocus></textarea>
-                <button class="btn btn-primary" id="sendBtn" onclick="sendTextQuery()">
-                    Ask ->
-                </button>
-            </div>
-            <div class="controls-row">
-                <button class="btn btn-mic" id="micBtn" onclick="toggleMic()">
-                    🎤 Record
-                </button>
-                <div>
-                    <label style="color: var(--text-muted); font-size: 0.85rem; margin-right: 0.5rem;">Language:</label>
-                    <select class="lang-select" id="langSelect">
-                        <option value="auto" selected>Auto-detect</option>
-                        <option value="hi">Hindi</option>
-                        <option value="en">English</option>
-                        <option value="ur">Urdu</option>
-                    </select>
+        <!-- Sleek Unified Input Card -->
+        <div class="input-card">
+            <textarea 
+                id="queryInput" 
+                class="query-textarea" 
+                placeholder="Ask in Hindi or English... (उदा: गोवा के प्रमुख पर्यटन स्थल क्या हैं?)" 
+                autofocus></textarea>
+
+            <div class="input-toolbar">
+                <div class="toolbar-left">
+                    <button class="btn btn-record" id="micBtn" onclick="toggleMic()" title="Record question with microphone">
+                        🎤 <span>Record</span>
+                    </button>
+                    
+                    <div class="recording-pill" id="micHint">
+                        <span class="recording-dot"></span>
+                        <span id="recordingTimer">00:00</span>
+                        <canvas id="audioVisualizer" width="90" height="16" style="vertical-align: middle;"></canvas>
+                    </div>
+
+                    <div class="lang-select-wrapper">
+                        <select class="lang-select" id="langSelect" title="Select input language">
+                            <option value="auto" selected>Auto Language</option>
+                            <option value="hi">Hindi (हिंदी)</option>
+                            <option value="en">English</option>
+                            <option value="ur">Urdu (اردو)</option>
+                        </select>
+                        <span class="lang-select-arrow">▼</span>
+                    </div>
                 </div>
-            </div>
-            <div id="micHint" style="font-size: 0.85rem; color: #fbbf24; margin-top: 0.75rem; display: none; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                <span>🔴 <b id="recordingTimer">00:00</b> — Speak clearly, click <b>"Stop"</b> when done</span>
-                <canvas id="audioVisualizer" width="160" height="24" style="border-radius: 4px; background: rgba(0,0,0,0.3); vertical-align: middle;"></canvas>
+
+                <div class="toolbar-right">
+                    <button class="btn btn-send" id="sendBtn" onclick="sendTextQuery()">
+                        Ask →
+                    </button>
+                </div>
             </div>
         </div>
 
+        <!-- Quick Suggestion Chips -->
+        <div class="suggestions">
+            <span class="chip" onclick="askSuggestion('गोवा के प्रसिद्ध समुद्र तट कौन से हैं?')">🏖️ गोवा के बीच</span>
+            <span class="chip" onclick="askSuggestion('ताजमहल कहाँ स्थित है और किसने बनवाया?')">🏛️ ताजमहल</span>
+            <span class="chip" onclick="askSuggestion('भारत में कुल कितने राज्य और केंद्र शासित प्रदेश हैं?')">🇮🇳 भारत के राज्य</span>
+            <span class="chip" onclick="askSuggestion('पानी का रासायनिक सूत्र क्या है?')">💧 पानी का सूत्र</span>
+        </div>
+
+        <!-- Loading -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Processing query...</p>
+            <p>Searching knowledge base...</p>
         </div>
 
+        <!-- Answer / Results Area -->
         <div class="results" id="results">
+            <!-- Audio Transcript (when mic is used) -->
             <div class="transcript-section" id="transcriptSection">
-                <div class="transcript-label">Transcribed from audio</div>
+                <div class="transcript-label">Transcribed Speech</div>
                 <div class="transcript-text" id="transcriptText"></div>
             </div>
-            <div class="result-header">
-                <span class="confidence-badge" id="confidenceBadge">-</span>
-                <span id="extractiveTag" style="font-size: 0.8rem; color: var(--text-muted); display: none;">
-                    Extractive answer
-                </span>
-            </div>
-            <div class="answer-text" id="answerText">
+
+            <div class="answer-container">
+                <div class="answer-header">
+                    <div class="badge-group">
+                        <span class="confidence-badge" id="confidenceBadge">-</span>
+                        <span class="extractive-pill" id="extractiveTag">Extractive ⚡</span>
+                    </div>
+                    <button class="btn-voice" id="speakBtn" onclick="toggleSpeak()" title="Listen to AI voice answer">
+                        🔊 <span>Listen</span>
+                    </button>
+                </div>
+
                 <div class="answer-content" id="answerContent"></div>
-                <button class="btn-speak" id="speakBtn" onclick="toggleSpeak()" title="Listen to answer">🔊</button>
             </div>
-            <div class="citations" id="citationsSection">
-                <h3>Citations</h3>
-                <div id="citationsList"></div>
-            </div>
-            <div class="latency">
-                <h3>Latency Breakdown</h3>
-                <div class="latency-bars" id="latencyBars"></div>
+
+            <!-- Collapsible Sources & Latency Details -->
+            <div class="details-accordion">
+                <button class="accordion-toggle" onclick="toggleDetails()" id="detailsToggleBtn">
+                    <span>Inspect Sources & Latency Breakdown</span>
+                    <span id="accordionArrow">▼</span>
+                </button>
+                <div class="accordion-content" id="accordionContent">
+                    <div class="citations" id="citationsSection">
+                        <h3>Citations & Passages</h3>
+                        <div id="citationsList"></div>
+                    </div>
+                    <div class="latency">
+                        <h3>Stage Latency Breakdown</h3>
+                        <div class="latency-bars" id="latencyBars"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="stats-panel">
-            <h2>Pipeline Stats</h2>
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-value" id="statP50">-</div>
-                    <div class="stat-label">P50 (post-STT)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statP70">-</div>
-                    <div class="stat-label">P70 (post-STT)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statP100">-</div>
-                    <div class="stat-label">P100 (post-STT)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statRuns">-</div>
-                    <div class="stat-label">Total Queries</div>
-                </div>
-            </div>
+        <!-- Minimal Footer Stats -->
+        <div class="stats-bar" id="statsGrid">
+            <div class="stat-item">P50: <b id="statP50">-</b></div>
+            <span style="opacity:0.3">•</span>
+            <div class="stat-item">P70: <b id="statP70">-</b></div>
+            <span style="opacity:0.3">•</span>
+            <div class="stat-item">P100: <b id="statP100">-</b></div>
+            <span style="opacity:0.3">•</span>
+            <div class="stat-item">Queries: <b id="statRuns">-</b></div>
         </div>
     </div>
 
     <script>
-        // Detect API base: if served from the API server, use its origin.
-        // If opened as a file or on a different origin, fall back to localhost.
         function getApiBase() {
             const loc = window.location;
             if (loc.protocol === 'http:' || loc.protocol === 'https:') {
@@ -474,15 +676,32 @@
             return 'http://localhost:8000';
         }
         const API_BASE = getApiBase();
-        const FETCH_TIMEOUT_MS = 60000; // 60s — first query loads ML model
+        const FETCH_TIMEOUT_MS = 60000;
 
         let mediaRecorder = null;
         let audioChunks = [];
         let recordingMimeType = '';
         let isRecording = false;
-        let autoSpeak = true; // Auto-speak answers by default
-
+        let autoSpeak = true;
         let activeAudio = null;
+
+        function askSuggestion(text) {
+            const input = document.getElementById('queryInput');
+            input.value = text;
+            sendTextQuery();
+        }
+
+        function toggleDetails() {
+            const content = document.getElementById('accordionContent');
+            const arrow = document.getElementById('accordionArrow');
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('open');
+                arrow.textContent = '▲';
+            }
+        }
 
         // ── Studio AI Voice & Text-to-Speech ──────────────────────
         async function speakText(text) {
@@ -492,10 +711,9 @@
             const btn = document.getElementById('speakBtn');
             if (btn) {
                 btn.classList.add('speaking');
-                btn.textContent = '⏹ Stop Voice';
+                btn.innerHTML = '⏹ <span>Stop</span>';
             }
 
-            // Language detection for voice selection
             const devanagari = (text.match(/[\u0900-\u097F]/g) || []).length;
             const arabic = (text.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g) || []).length;
             const total = (text.match(/\w/g) || []).length || 1;
@@ -508,7 +726,6 @@
                 langCode = 'en-IN';
             }
 
-            // 1. Try Studio AI Voice (Sarvam bulbul:v3)
             try {
                 const resp = await fetch(`${API_BASE}/tts`, {
                     method: 'POST',
@@ -529,7 +746,6 @@
                 console.warn('Sarvam Studio TTS failed, falling back to browser voice:', e);
             }
 
-            // 2. Fallback to native browser speech
             fallbackSpeak(text, langCode);
         }
 
@@ -558,7 +774,7 @@
             const btn = document.getElementById('speakBtn');
             if (btn) {
                 btn.classList.remove('speaking');
-                btn.textContent = '🔊 Listen';
+                btn.innerHTML = '🔊 <span>Listen</span>';
             }
         }
 
@@ -571,7 +787,7 @@
             }
         }
 
-        // ── Connection check on load ──────────────────────────────
+        // ── Server Health Check ──────────────────────────────────
         async function checkServer() {
             const el = document.getElementById('serverStatus');
             try {
@@ -581,22 +797,18 @@
                 clearTimeout(tid);
                 if (resp.ok) {
                     el.className = 'server-status online';
-                    el.textContent = 'Server connected at ' + API_BASE;
-                    setTimeout(() => { el.style.display = 'none'; }, 3000);
+                    el.textContent = 'Connected to VoiceRAG backend';
+                    setTimeout(() => { el.style.display = 'none'; }, 2500);
                 } else {
                     throw new Error('bad status');
                 }
             } catch (e) {
                 el.className = 'server-status offline';
-                el.innerHTML = 'Cannot reach the API server at <b>' + API_BASE + '</b>. '
-                    + 'Make sure you started the server with: <code>python run.py</code> '
-                    + 'and are opening <b>http://localhost:8000</b> in your browser '
-                    + '(not the HTML file directly).';
+                el.innerHTML = 'Cannot reach API at <b>' + API_BASE + '</b>. Start server with <code>python run.py</code>.';
             }
         }
         checkServer();
 
-        // ── Fetch with timeout ────────────────────────────────────
         async function fetchWithTimeout(url, options, timeoutMs) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -607,7 +819,7 @@
             } catch (e) {
                 clearTimeout(timer);
                 if (e.name === 'AbortError') {
-                    throw new Error('Server timed out after ' + (timeoutMs / 1000) + 's. The first query loads the ML model — try again.');
+                    throw new Error('Server timed out. First query loads ML models into RAM — please retry.');
                 }
                 throw e;
             }
@@ -639,12 +851,8 @@
                     'audio/ogg;codecs=opus',
                     'audio/ogg'
                 ];
-                const supportedMime = mimeCandidates.find(
-                    (mime) => MediaRecorder.isTypeSupported(mime)
-                );
-                mediaRecorder = supportedMime
-                    ? new MediaRecorder(stream, { mimeType: supportedMime })
-                    : new MediaRecorder(stream);
+                const supportedMime = mimeCandidates.find(mime => MediaRecorder.isTypeSupported(mime));
+                mediaRecorder = supportedMime ? new MediaRecorder(stream, { mimeType: supportedMime }) : new MediaRecorder(stream);
                 recordingMimeType = mediaRecorder.mimeType || supportedMime || 'audio/webm';
                 audioChunks = [];
 
@@ -656,11 +864,9 @@
                     const blob = new Blob(audioChunks, { type: recordingMimeType });
                     const lang = document.getElementById('langSelect').value;
                     const extension = recordingMimeType.includes('ogg') ? 'ogg' : 'webm';
-                    const audioFile = new File([blob], `recording.${extension}`, {
-                        type: recordingMimeType
-                    });
+                    const audioFile = new File([blob], `recording.${extension}`, { type: recordingMimeType });
                     if (audioFile.size === 0) {
-                        alert('No audio was recorded. Please try again.');
+                        alert('No audio was recorded. Please speak clearly into your mic.');
                     } else {
                         await runQuery({ audio: audioFile, language: lang }, true);
                     }
@@ -669,10 +875,9 @@
 
                 mediaRecorder.start();
                 isRecording = true;
-                btn.textContent = '⏹ Stop (Done)';
+                btn.innerHTML = '⏹ <span>Stop</span>';
                 btn.classList.add('recording');
 
-                // Start visualizer waveform and timer
                 startRecordingVisuals(stream);
             } catch (err) {
                 alert('Microphone access denied: ' + err.message);
@@ -683,7 +888,7 @@
             const hint = document.getElementById('micHint');
             const timerEl = document.getElementById('recordingTimer');
             const canvas = document.getElementById('audioVisualizer');
-            if (hint) hint.style.display = 'flex';
+            if (hint) hint.style.display = 'inline-flex';
 
             let seconds = 0;
             if (timerEl) timerEl.textContent = '00:00';
@@ -692,14 +897,13 @@
                 const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
                 const secs = String(seconds % 60).padStart(2, '0');
                 if (timerEl) timerEl.textContent = `${mins}:${secs}`;
-                // Auto-stop guard after 15 seconds
                 if (seconds >= 15) stopRecording();
             }, 1000);
 
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const analyser = audioContext.createAnalyser();
-                analyser.fftSize = 64;
+                analyser.fftSize = 32;
                 const source = audioContext.createMediaStreamSource(stream);
                 source.connect(analyser);
 
@@ -738,7 +942,7 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 const btn = document.getElementById('micBtn');
-                btn.textContent = '🎤 Record';
+                btn.innerHTML = '🎤 <span>Record</span>';
                 btn.classList.remove('recording');
                 cleanupRecordingVisuals();
             }
@@ -754,11 +958,7 @@
                 let resp;
                 if (isAudio) {
                     const formData = new FormData();
-                    formData.append(
-                        'audio',
-                        params.audio,
-                        params.audio.name || 'recording.webm'
-                    );
+                    formData.append('audio', params.audio, params.audio.name || 'recording.webm');
                     formData.append('language', params.language);
                     resp = await fetchWithTimeout(
                         `${API_BASE}/query/audio`,
@@ -794,16 +994,8 @@
             } catch (err) {
                 if (results) results.classList.add('visible');
                 let message = err.message || 'Unknown request error';
-                if (message === 'Failed to fetch' || message.includes('NetworkError')) {
-                    message = 'Cannot reach the server at ' + API_BASE
-                        + '. Make sure the server is running (python run.py) '
-                        + 'and you opened http://localhost:8000 in your browser.';
-                }
-                // The visible text node is answerContent; keep a fallback for
-                // older cached pages and never throw a second DOM error.
-                const errorTarget = document.getElementById('answerContent')
-                    || document.getElementById('answerText');
-                if (errorTarget) errorTarget.textContent = 'Error: ' + message;
+                const errorTarget = document.getElementById('answerContent');
+                if (errorTarget) errorTarget.textContent = 'Notice: ' + message;
                 const errorBadge = document.getElementById('confidenceBadge');
                 if (errorBadge) {
                     errorBadge.textContent = 'Error';
@@ -818,47 +1010,40 @@
             const results = document.getElementById('results');
             results.classList.add('visible');
 
-            // Transcript (shown when audio was transcribed)
             const transcriptSection = document.getElementById('transcriptSection');
             const transcriptText = document.getElementById('transcriptText');
             if (data.transcript) {
                 transcriptSection.classList.add('visible');
                 transcriptText.textContent = data.transcript;
-                // Also populate the textarea so user can see/edit what was heard
                 document.getElementById('queryInput').value = data.transcript;
             } else {
                 transcriptSection.classList.remove('visible');
             }
 
-            // Confidence badge
             const badge = document.getElementById('confidenceBadge');
             if (data.refused) {
-                badge.textContent = 'Refused: ' + (data.refusal_reason || 'unknown');
+                badge.textContent = 'Refused: ' + (data.refusal_reason || 'Out of domain');
                 badge.className = 'confidence-badge confidence-refused';
             } else if (data.confidence >= 0.7) {
-                badge.textContent = 'Confidence: ' + (data.confidence * 100).toFixed(0) + '%';
+                badge.textContent = (data.confidence * 100).toFixed(0) + '% match';
                 badge.className = 'confidence-badge confidence-high';
             } else if (data.confidence >= 0.4) {
-                badge.textContent = 'Confidence: ' + (data.confidence * 100).toFixed(0) + '%';
+                badge.textContent = (data.confidence * 100).toFixed(0) + '% match';
                 badge.className = 'confidence-badge confidence-medium';
             } else {
-                badge.textContent = 'Confidence: ' + (data.confidence * 100).toFixed(0) + '%';
+                badge.textContent = (data.confidence * 100).toFixed(0) + '% match';
                 badge.className = 'confidence-badge confidence-low';
             }
 
-            // Extractive tag
             const extTag = document.getElementById('extractiveTag');
-            extTag.style.display = data.extractive ? 'inline' : 'none';
+            extTag.style.display = data.extractive ? 'inline-block' : 'none';
 
-            // Answer
             document.getElementById('answerContent').textContent = data.answer;
 
-            // Auto-speak the answer if enabled
             if (autoSpeak && data.answer && !data.refused) {
                 setTimeout(function() { speakText(data.answer); }, 300);
             }
 
-            // Citations
             const citSection = document.getElementById('citationsSection');
             const citList = document.getElementById('citationsList');
             if (data.citations && data.citations.length > 0) {
@@ -870,18 +1055,16 @@
                 citSection.style.display = 'none';
             }
 
-            // Latency
             if (data.latency_breakdown) {
                 renderLatency(data.latency_breakdown);
             }
 
-            // Refresh stats
             fetchStats();
         }
 
         function renderLatency(lb) {
-            var container = document.getElementById('latencyBars');
-            var stages = [
+            const container = document.getElementById('latencyBars');
+            const stages = [
                 { label: 'STT', value: lb.stt_ms, color: '#6366f1' },
                 { label: 'Normalize', value: lb.normalize_ms, color: '#8b5cf6' },
                 { label: 'Retrieve', value: lb.retrieve_ms, color: '#a78bfa' },
@@ -889,24 +1072,24 @@
                 { label: 'Guardrail', value: lb.guardrail_ms, color: '#e879f9' },
                 { label: 'Generate', value: lb.generate_ms, color: '#f472b6' },
                 { label: 'Postproc', value: lb.postprocess_ms, color: '#fb7185' },
-                { label: 'TOTAL', value: lb.total_post_stt_ms, color: '#22c55e' },
+                { label: 'TOTAL', value: lb.total_post_stt_ms, color: '#10b981' },
             ];
 
-            var maxVal = 1;
-            stages.forEach(function(s) {
+            let maxVal = 1;
+            stages.forEach(s => {
                 if (s.value != null && s.value > maxVal) maxVal = s.value;
             });
 
-            container.innerHTML = stages.map(function(s) {
+            container.innerHTML = stages.map(s => {
                 if (s.value == null) return '';
-                var pct = Math.min((s.value / maxVal) * 100, 100);
-                var isBold = s.label === 'TOTAL';
+                const pct = Math.min((s.value / maxVal) * 100, 100);
+                const isBold = s.label === 'TOTAL';
                 return '<div class="latency-row">'
-                    + '<span class="latency-label" ' + (isBold ? 'style="font-weight:700;color:var(--text)"' : '') + '>' + s.label + '</span>'
+                    + '<span class="latency-label" ' + (isBold ? 'style="font-weight:600;color:var(--text)"' : '') + '>' + s.label + '</span>'
                     + '<div class="latency-bar">'
                     + '<div class="latency-fill" style="width:' + pct + '%;background:' + s.color + '"></div>'
                     + '</div>'
-                    + '<span class="latency-value" ' + (isBold ? 'style="color:var(--success)"' : '') + '>' + s.value.toFixed(1) + 'ms</span>'
+                    + '<span class="latency-value" ' + (isBold ? 'style="color:var(--success);font-weight:600"' : '') + '>' + s.value.toFixed(1) + 'ms</span>'
                     + '</div>';
             }).join('');
         }
@@ -923,10 +1106,9 @@
                     document.getElementById('statP100').textContent = data.post_stt.p100_ms + 'ms';
                     document.getElementById('statRuns').textContent = data.total_runs;
                 }
-            } catch (e) { /* stats endpoint may not be ready */ }
+            } catch (e) {}
         }
 
-        // Enter key to send
         document.getElementById('queryInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -934,7 +1116,6 @@
             }
         });
 
-        // Initial stats fetch
         fetchStats();
     </script>
 </body>
